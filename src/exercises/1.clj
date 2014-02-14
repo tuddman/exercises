@@ -12,9 +12,6 @@
 (def mag-str {1 " thousand " 2 " million " 3 " billion " 4 " trillion "})
 
 
-;; Utility Methods
-
-
 (defn expt [pow] (apply * (repeat pow 1000)))
 
 
@@ -50,7 +47,7 @@
    (< (expt 4) n (expt 5)) (mag-str 4)))
 
 
-(defn sub-hund->txt
+(defn- sub-hund->txt
   "converts n < 100 into txt."
   [n]
   (if (contains? num-as-str n) (str (num-as-str n) " ")
@@ -65,6 +62,10 @@
    :else (sub-hund->txt (rem n 100))))
 
 
+(defn- remainder [n dollars]
+  (quot (- dollars (* (quot dollars (expt n)) (expt n))) (expt (- n 1))))
+
+
 (defn dollars->txt [n]
   (let [dollars (Math/round (Double. (get-dollars n)))
         magnitude (get-mag dollars)
@@ -74,40 +75,27 @@
       (= magnitude 4)
         (do
           (swap! amt conj {:trillion (quot dollars (expt 4))})
-
-          (swap! amt conj {:billion (quot (- dollars (* (quot dollars (expt 4))
-                                                               (expt 4))) (expt 3))})
-          (swap! amt conj {:million (quot (- dollars (* (quot dollars (expt 3))
-                                                               (expt 3))) (expt 2))})
-          (swap! amt conj {:thousand (quot (- dollars (* (quot dollars (expt 2))
-                                                               (expt 2))) (expt 1))})
+          (swap! amt conj {:billion (remainder 4 dollars)})
+          (swap! amt conj {:million (remainder 3 dollars)})
+          (swap! amt conj {:thousand (remainder 2 dollars)})
           (swap! amt conj {:subthou (rem dollars (expt 1))}))
-
      (= magnitude 3)
         (do
           (swap! amt conj {:billion (quot dollars (expt 3))})
-
-          (swap! amt conj {:million (quot (- dollars (* (quot dollars (expt 3))
-                                                               (expt 3))) (expt 2))})
-          (swap! amt conj {:thousand (quot (- dollars (* (quot dollars (expt 2))
-                                                               (expt 2))) (expt 1))})
+          (swap! amt conj {:million (remainder 3 dollars)})
+          (swap! amt conj {:thousand (remainder 2 dollars)})
           (swap! amt conj {:subthou (rem dollars (expt 1))}))
-
       (= magnitude 2)
         (do
           (swap! amt conj {:million (quot dollars (expt 2))})
-          (swap! amt conj {:thousand (quot (- dollars (* (quot dollars (expt 2))
-                                                               (expt 2))) (expt 1))})
+          (swap! amt conj {:thousand (remainder 2 dollars)})
           (swap! amt conj {:subthou (rem dollars (expt 1))}))
-
       (= magnitude 1)
         (do
           (swap! amt conj {:thousand (quot dollars (expt 1))})
           (swap! amt conj {:subthou (rem dollars (expt 1))}))
-
      (= magnitude 0)
         (swap! amt conj {:subthou dollars}) )
-
     (if  (contains? @amt :trillion)
       (swap! amt-str str (sub-thou->txt (@amt :trillion)) (mag-str 4)))
     (if  (and (contains? @amt :billion) (pos? (@amt :billion)))

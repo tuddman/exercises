@@ -2,18 +2,6 @@
 
 ; Poker Hand
 
-(def hands {:1 "Straight Flush"
-            :2 "Four of A Kind"
-            :3 "Full House"
-            :4 "Flush"
-            :5 "Straight"
-            :6 "3 of a Kind"
-            :7 "Two Pair"
-            :8 "One Pair"
-            :9 "High Card"})
-
-(def card-names {\A "Ace" \K "King" \Q "Queen" \J "Jack" \T "Ten" \9 "Nine " \8 "Eight" \7 "Seven " \6 "Six" \5 "Five" \4 "Four" \3 "Three" \2 "Two" })
-
 (def suits {\c "Clubs" \d "Diamonds" \h "Hearts" \s "Spades"})
 
 (def card-rank (reverse (seq "AKQJT98765432ax")))
@@ -86,13 +74,12 @@
 (defn determine-hand
   [hand]
   (cond
-   (straight-flush? hand) (hands :1)
-   (four? hand)           (hands :2)
-   (full-house? hand)     (hands :3)
-   (flush? hand)          (hands :4)
-   (straight? hand)       (hands :5)
-   (three? hand)          (hands :6)
-   (two-pair? hand)       (hands :7)
-   (one-pair? hand)       (hands :8)
-   :else                  (hands :9)))
-
+   (straight-flush? hand) "Straight Flush"
+   (four? hand)           "Four of A Kind"
+   (full-house? hand)     "Full House"
+   (flush? hand)          "Flush"
+   (straight? hand)       "Straight"
+   (three? hand)          "3 of a Kind"
+   (two-pair? hand)       "Two Pair"
+   (one-pair? hand)       "One Pair"
+   :else                  "High Card")
